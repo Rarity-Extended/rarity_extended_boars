@@ -10,15 +10,21 @@ abstract contract rERC20 {
     string public symbol;
     uint8 public constant decimals = 18;
     uint public totalSupply = 0;
+    bool public init_minter = false;
 
-    rarity public rm;
+    IRarity public rm;
     address public minter;
 
-    constructor(string memory _name, string memory _symbol, address _rm, address _minter){
+    constructor(string memory _name, string memory _symbol, address _rm){
         name = _name;
         symbol = _symbol;
-        rm = rarity(_rm);
+        rm = IRarity(_rm);
+    }
+
+    function setMinter(address _minter) external {
+        require(init_minter == false, "nope");
         minter = _minter;
+        init_minter = true;
     }
 
     mapping(uint => mapping (uint => uint)) public allowance;
