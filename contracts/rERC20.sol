@@ -23,8 +23,8 @@ abstract contract rERC20 {
 
     function setMinter(address _minter) external {
         require(init_minter == false, "nope");
-        minter = _minter;
         init_minter = true;
+        minter = _minter;
     }
 
     mapping(uint => mapping (uint => uint)) public allowance;
@@ -38,7 +38,7 @@ abstract contract rERC20 {
     }
 
     function mint(uint dst, uint amount) external {
-        require(msg.sender == minter);
+        require(msg.sender == minter, "dont hack pls");
         totalSupply += amount;
         balanceOf[dst] += amount;
         emit Transfer(dst, dst, amount);

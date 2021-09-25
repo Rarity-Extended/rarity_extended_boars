@@ -227,7 +227,7 @@ contract boarAdventure {
         boar_population -= 1;
     }
 
-    function simulate_reproduce(uint _summoner) public view returns (uint reward, RewardReproduce reward_type) {
+    function simulate_reproduce(uint _summoner) public view returns (uint reward) {
         uint _level = rm.level(_summoner);
         uint _class = rm.class(_summoner);
         (,,,uint32 _int,uint32 _wis,uint32 _cha) = attr.ability_scores(_summoner);
@@ -244,15 +244,14 @@ contract boarAdventure {
             reward = 2;
         }
 
-        reward_type = random_reward_reproduce(_summoner);
     }
 
-    function reproduce(uint _summoner) external returns (uint reward, RewardReproduce reward_type) {
+    function reproduce(uint _summoner, RewardReproduce expected_reward) external returns (uint reward) {
         require(_isApprovedOrOwner(_summoner));
         require(block.timestamp > actions_log[_summoner]);
         actions_log[_summoner] = block.timestamp + DAY;
-        (reward, reward_type) = simulate_reproduce(_summoner);
-        mint_reward_reproduce(_summoner, reward, reward_type);
+        (reward) = simulate_reproduce(_summoner);
+        mint_reward_reproduce(_summoner, reward, expected_reward);
         boar_population += 1;
     }
 

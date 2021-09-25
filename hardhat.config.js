@@ -25,6 +25,6 @@ module.exports = {
     apiKey: ftmscanApiKey
   },
   gasReporter: {
-    excludeContracts: [""]
+    excludeContracts: ["contracts/mocks/"]
   }
 };
