@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const { smock } = require("@defi-wonderland/smock");
 
 describe("BoarAdventure", function () {
+
     before(async function () {
         //Preparing the env
         [this.deployerSigner] = await ethers.getSigners();
@@ -12,7 +13,6 @@ describe("BoarAdventure", function () {
         await this.rarity.summon(1);
         await this.rarity.summon(2);
         await this.rarity.summon(3);
-
 
         //Mock attr
         this.Attributes = await smock.mock('rarity_attributes');
@@ -39,6 +39,10 @@ describe("BoarAdventure", function () {
                 charisma: 8,
             }
         });
+
+        //Mock skills
+        this.Skills = await smock.mock('rarity_skills');
+        this.skills = await this.Skills.deploy(this.rarity.address, this.attributes.address, ethers.constants.AddressZero); //Using zero address to evade mock "Codex skills"
 
         //Deploy randomCodex
         this.RandomCodex = await ethers.getContractFactory("codex");
@@ -67,7 +71,7 @@ describe("BoarAdventure", function () {
 
         //Deploy boarAdventure
         this.BoarAdventure = await ethers.getContractFactory("boarAdventure");
-        this.boarAdventure = await this.BoarAdventure.deploy(this.rarity.address, this.attributes.address, this.randomCodex.address, this.mushroom.address, this.berries.address, this.wood.address, this.leather.address, this.meat.address, this.tusks.address);
+        this.boarAdventure = await this.BoarAdventure.deploy(this.rarity.address, this.attributes.address, this.skills.address, this.randomCodex.address, this.mushroom.address, this.berries.address, this.wood.address, this.leather.address, this.meat.address, this.tusks.address);
         await this.boarAdventure.deployed();
 
         //Setting minter
@@ -81,13 +85,13 @@ describe("BoarAdventure", function () {
 
     it("Should reproduce successfully...", async function () {
         let sim = await this.boarAdventure.simulate_reproduce(0);
-        // console.log("reward qty:", ethers.utils.formatUnits(sim, "wei"));
+        console.log("reward qty:", ethers.utils.formatUnits(sim, "wei"));
 
         let sim1 = await this.boarAdventure.simulate_reproduce(1);
-        // console.log("reward qty:", ethers.utils.formatUnits(sim1, "wei"));
+        console.log("reward qty:", ethers.utils.formatUnits(sim1, "wei"));
 
         let sim2 = await this.boarAdventure.simulate_reproduce(2);
-        // console.log("reward qty:", ethers.utils.formatUnits(sim2, "wei"));
+        console.log("reward qty:", ethers.utils.formatUnits(sim2, "wei"));
 
         await this.boarAdventure.reproduce(0, 1);
         expect(await this.mushroom.balanceOf(0)).equal(sim);

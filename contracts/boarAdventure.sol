@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IRarity.sol";
 import "./interfaces/IAttributes.sol";
+import "./interfaces/ISkills.sol";
 import "./interfaces/IrERC20.sol";
 import "./interfaces/IRandomCodex.sol";
 
@@ -18,6 +19,7 @@ contract boarAdventure {
 
     IRarity public rm;
     attributes public attr;
+    ISkills public skills;
     IRandomCodex public random;
     IrERC20 public mushroom;
     IrERC20 public berries;
@@ -40,9 +42,10 @@ contract boarAdventure {
         Tusks
     }
     
-    constructor(address _rmAddr, address _attrAddr, address _random, address _mushroom, address _berries, address _wood, address _leather, address _meat, address _tusks) {
+    constructor(address _rmAddr, address _attrAddr, address _skills, address _random, address _mushroom, address _berries, address _wood, address _leather, address _meat, address _tusks) {
         rm = IRarity(_rmAddr);
         attr = attributes(_attrAddr);
+        skills = ISkills(_skills);
         random = IRandomCodex(_random);
         mushroom = IrERC20(_mushroom);
         berries = IrERC20(_berries);
@@ -52,19 +55,12 @@ contract boarAdventure {
         tusks = IrERC20(_tusks);
     }
 
-    function is_between(uint input, uint top, uint bottom) internal pure returns (bool){
-        //Return TRUE if "input" is between "top" and "bottom"
-        if (top < bottom){
-            (top, bottom) = (bottom, top);
-        }
-
-        if (input <= top && input >= bottom) {
-            return true;
-        }else{
-            return false;
-        }
+    function _isApprovedOrOwner(uint _summoner) internal view returns (bool) {
+        return rm.getApproved(_summoner) == msg.sender || rm.ownerOf(_summoner) == msg.sender;
     }
-    
+
+    /*KILL MECHANISM */
+
     function health_by_class(uint _class) public pure returns (uint health) {
         if (_class == 1) {
             health = 12;
@@ -160,12 +156,10 @@ contract boarAdventure {
 
     function random_reward_kill(uint _summoner) internal view returns (RewardKill reward) {
         uint res = random.dn(_summoner, 4);
+        if (res == 0) {
+            return RewardKill(1); //Leather
+        }
         return RewardKill(res);
-    }
-
-    function random_reward_reproduce(uint _summoner) internal view returns (RewardReproduce reward) {
-        uint res = random.dn(_summoner, 4);
-        return RewardReproduce(res);
     }
 
     function mint_reward_kill(uint receiver, uint qty, RewardKill reward) internal {
@@ -182,20 +176,6 @@ contract boarAdventure {
         }
     }
 
-    function mint_reward_reproduce(uint receiver, uint qty, RewardReproduce reward) internal {
-        if (reward == RewardReproduce.Mushroom) {
-            mushroom.mint(receiver, qty);
-        }
-
-        if (reward == RewardReproduce.Berries) {
-            berries.mint(receiver, qty);
-        }
-
-        if (reward == RewardReproduce.Wood) {
-            wood.mint(receiver, qty);
-        }
-    }
-    
     function simulate_kill(uint _summoner) public view returns (uint reward, RewardKill reward_type) {
         uint _level = rm.level(_summoner);
         uint _class = rm.class(_summoner);
@@ -227,23 +207,74 @@ contract boarAdventure {
         boar_population -= 1;
     }
 
+    /*REPRODUCE MECHANISM */
+
+    function base_points_by_class(uint _class) public pure returns (uint points) {
+        if (_class == 1) {
+            points = 8;
+        } else if (_class == 2) {
+            points = 4;
+        } else if (_class == 3) {
+            points = 4;
+        } else if (_class == 4) {
+            points = 8;
+        } else if (_class == 5) {
+            points = 4;
+        } else if (_class == 6) {
+            points = 4;
+        } else if (_class == 7) {
+            points = 4;
+        } else if (_class == 8) {
+            points = 4;
+        } else if (_class == 9) {
+            points = 4;
+        } else if (_class == 10) {
+            points = 4;
+        } else if (_class == 11) {
+            points = 8;
+        }
+    }
+
+    function multiplier_points_by_level(uint _points, uint level) public pure returns (uint points) {
+        if (level == 0) {
+            return _points;
+        }else{
+            points = _points * level;
+        }
+    }
+
+    function bonus_by_handle_animal(uint _points, uint _summoner) public view returns (uint points) {
+        uint8[36] memory _skills = skills.get_skills(_summoner);
+        uint handle_animal = uint(_skills[14]); //Handle animal
+        points = _points + (handle_animal * 2);
+    }
+
+    function bonus_by_attr(uint _points, uint _summoner) public view returns (uint points) {
+        (,,,uint32 _int,uint32 _wis,uint32 _cha) = attr.ability_scores(_summoner);
+        points = _points + ((_int + _wis + _cha) / 2);
+    }
+
+    function mint_reward_reproduce(uint receiver, uint qty, RewardReproduce reward) internal {
+        if (reward == RewardReproduce.Mushroom) {
+            mushroom.mint(receiver, qty);
+        }
+
+        if (reward == RewardReproduce.Berries) {
+            berries.mint(receiver, qty);
+        }
+
+        if (reward == RewardReproduce.Wood) {
+            wood.mint(receiver, qty);
+        }
+    }
+
     function simulate_reproduce(uint _summoner) public view returns (uint reward) {
         uint _level = rm.level(_summoner);
         uint _class = rm.class(_summoner);
-        (,,,uint32 _int,uint32 _wis,uint32 _cha) = attr.ability_scores(_summoner);
-
-        if (is_between(_int, 16, 10) && is_between(_wis, 16, 10) && is_between(_cha, 16, 10)) {
-            reward = 10;
-        }
-
-        if (is_between(_int, 10, 5) && is_between(_wis, 10, 5) && is_between(_cha, 10, 5)) {
-            reward = 6;
-        }
-
-        if (is_between(_int, 5, 0) && is_between(_wis, 5, 0) && is_between(_cha, 5, 0)) {
-            reward = 2;
-        }
-
+        reward = base_points_by_class(_class);
+        reward = multiplier_points_by_level(reward, _level);
+        reward = bonus_by_handle_animal(reward, _summoner);
+        reward = bonus_by_attr(reward, _summoner);
     }
 
     function reproduce(uint _summoner, RewardReproduce expected_reward) external returns (uint reward) {
@@ -253,10 +284,6 @@ contract boarAdventure {
         (reward) = simulate_reproduce(_summoner);
         mint_reward_reproduce(_summoner, reward, expected_reward);
         boar_population += 1;
-    }
-
-    function _isApprovedOrOwner(uint _summoner) internal view returns (bool) {
-        return rm.getApproved(_summoner) == msg.sender || rm.ownerOf(_summoner) == msg.sender;
     }
 
 }
