@@ -95,13 +95,13 @@ describe("BoarAdventure", function () {
         let boar_population_before = await this.boarAdventure.boar_population();
 
         let sim = await this.boarAdventure.simulate_reproduce(0);
-        console.log("reward qty:", ethers.utils.formatUnits(sim, "wei"));
+        // console.log("reward qty:", ethers.utils.formatUnits(sim, "wei"));
 
         let sim1 = await this.boarAdventure.simulate_reproduce(1);
-        console.log("reward qty:", ethers.utils.formatUnits(sim1, "wei"));
+        // console.log("reward qty:", ethers.utils.formatUnits(sim1, "wei"));
 
         let sim2 = await this.boarAdventure.simulate_reproduce(2);
-        console.log("reward qty:", ethers.utils.formatUnits(sim2, "wei"));
+        // console.log("reward qty:", ethers.utils.formatUnits(sim2, "wei"));
 
         await this.boarAdventure.reproduce(0, 1);
         expect(await this.mushroom.balanceOf(0)).equal(sim);

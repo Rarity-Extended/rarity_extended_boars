@@ -16,6 +16,12 @@ module.exports = {
     }
   },
   networks: {
+    hardhat: {
+      forking: {
+        url: rpc,
+        timeout: 200000
+      }
+    },
     fantom: {
       url: rpc,
       accounts: [privateKey]
