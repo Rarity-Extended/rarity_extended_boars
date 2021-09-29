@@ -12,7 +12,7 @@ describe("BoarAdventure", function () {
         this.rarity = await this.Rarity.deploy();
         await this.rarity.summon(1);
         await this.rarity.summon(2);
-        await this.rarity.summon(3);
+        await this.rarity.summon(4);
 
         //Mock attr
         this.Attributes = await smock.mock('rarity_attributes');
@@ -35,14 +35,22 @@ describe("BoarAdventure", function () {
                 dexterity: 1,
                 constitution: 1,
                 intelligence: 8,
-                wisdom: 8,
-                charisma: 8,
+                wisdom: 4,
+                charisma: 2,
             }
         });
 
         //Mock skills
         this.Skills = await smock.mock('rarity_skills');
         this.skills = await this.Skills.deploy(this.rarity.address, this.attributes.address, ethers.constants.AddressZero); //Using zero address to evade mock "Codex skills"
+
+        await this.skills.setVariable('skills', {
+            0: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        });
+
+        await this.skills.setVariable('skills', {
+            1: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        });
 
         //Deploy randomCodex
         this.RandomCodex = await ethers.getContractFactory("codex");
@@ -84,6 +92,8 @@ describe("BoarAdventure", function () {
     });
 
     it("Should reproduce successfully...", async function () {
+        let boar_population_before = await this.boarAdventure.boar_population();
+
         let sim = await this.boarAdventure.simulate_reproduce(0);
         console.log("reward qty:", ethers.utils.formatUnits(sim, "wei"));
 
@@ -95,27 +105,32 @@ describe("BoarAdventure", function () {
 
         await this.boarAdventure.reproduce(0, 1);
         expect(await this.mushroom.balanceOf(0)).equal(sim);
+        expect(boar_population_before + 1).equal(await this.boarAdventure.boar_population());
         await expect(this.boarAdventure.reproduce(0, 1)).to.be.reverted;
 
         await this.boarAdventure.reproduce(1, 2);
         expect(await this.berries.balanceOf(1)).equal(sim1);
+        expect(boar_population_before + 2).equal(await this.boarAdventure.boar_population());
         await expect(this.boarAdventure.reproduce(1, 2)).to.be.reverted;
 
         await this.boarAdventure.reproduce(2, 3);
         expect(await this.wood.balanceOf(2)).equal(sim2);
+        expect(boar_population_before + 3).equal(await this.boarAdventure.boar_population());
         await expect(this.boarAdventure.reproduce(2, 3)).to.be.reverted;
     });
 
     it("Should kill successfully...", async function () {
+        let boar_population_before = await this.boarAdventure.boar_population();
         let sim = await this.boarAdventure.simulate_kill(0);
-        console.log("reward qty:", ethers.utils.formatUnits(sim.reward, "wei"), "reward type:", sim.reward_type);
+        // console.log("reward qty:", ethers.utils.formatUnits(sim.reward, "wei"), "reward type:", sim.reward_type);
 
         await expect(this.boarAdventure.kill(0)).to.be.reverted;
         await network.provider.send("evm_increaseTime", [172800]);
         await this.boarAdventure.kill(0);
+        expect(boar_population_before - 1).equal(await this.boarAdventure.boar_population());
     });
 
     it("rERC20", async function () {
-        
+
     });
 });

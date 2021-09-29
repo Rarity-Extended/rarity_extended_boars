@@ -61,7 +61,7 @@ contract boarAdventure {
 
     /*KILL MECHANISM */
 
-    function health_by_class(uint _class) public pure returns (uint health) {
+    function health_by_class(uint _class) internal pure returns (uint health) {
         if (_class == 1) {
             health = 12;
         } else if (_class == 2) {
@@ -87,7 +87,7 @@ contract boarAdventure {
         }
     }
     
-    function health_by_class_and_level(uint _class, uint _level, uint32 _const) public pure returns (uint health) {
+    function health_by_class_and_level(uint _class, uint _level, uint32 _const) internal pure returns (uint health) {
         int _mod = modifier_for_attribute(_const);
         int _base_health = int(health_by_class(_class)) + _mod;
         if (_base_health <= 0) {
@@ -96,7 +96,7 @@ contract boarAdventure {
         health = uint(_base_health) * _level;
     }
     
-    function base_attack_bonus_by_class(uint _class) public pure returns (uint attack) {
+    function base_attack_bonus_by_class(uint _class) internal pure returns (uint attack) {
         if (_class == 1) {
             attack = 4;
         } else if (_class == 2) {
@@ -122,26 +122,26 @@ contract boarAdventure {
         }
     }
     
-    function base_attack_bonus_by_class_and_level(uint _class, uint _level) public pure returns (uint) {
+    function base_attack_bonus_by_class_and_level(uint _class, uint _level) internal pure returns (uint) {
         return _level * base_attack_bonus_by_class(_class) / 4;
     }
     
-    function modifier_for_attribute(uint _attribute) public pure returns (int _modifier) {
+    function modifier_for_attribute(uint _attribute) internal pure returns (int _modifier) {
         if (_attribute == 9) {
             return -1;
         }
         return (int(_attribute) - 10) / 2;
     }
     
-    function attack_bonus(uint _class, uint _str, uint _level) public pure returns (int) {
+    function attack_bonus(uint _class, uint _str, uint _level) internal pure returns (int) {
         return  int(base_attack_bonus_by_class_and_level(_class, _level)) + modifier_for_attribute(_str);
     }
     
-    function to_hit_ac(int _attack_bonus) public pure returns (bool) {
+    function to_hit_ac(int _attack_bonus) internal pure returns (bool) {
         return (_attack_bonus > dungeon_armor_class);
     }
     
-    function damage(uint _str) public pure returns (uint) {
+    function damage(uint _str) internal pure returns (uint) {
         int _mod = modifier_for_attribute(_str);
         if (_mod <= 1) {
             return 1;
@@ -150,7 +150,7 @@ contract boarAdventure {
         }
     }
     
-    function armor_class(uint _dex) public pure returns (int) {
+    function armor_class(uint _dex) internal pure returns (int) {
         return modifier_for_attribute(_dex);
     }
 
@@ -209,7 +209,7 @@ contract boarAdventure {
 
     /*REPRODUCE MECHANISM */
 
-    function base_points_by_class(uint _class) public pure returns (uint points) {
+    function base_points_by_class(uint _class) internal pure returns (uint points) {
         if (_class == 1) {
             points = 8;
         } else if (_class == 2) {
@@ -235,7 +235,7 @@ contract boarAdventure {
         }
     }
 
-    function multiplier_points_by_level(uint _points, uint level) public pure returns (uint points) {
+    function multiplier_points_by_level(uint _points, uint level) internal pure returns (uint points) {
         if (level == 0) {
             return _points;
         }else{
@@ -243,13 +243,13 @@ contract boarAdventure {
         }
     }
 
-    function bonus_by_handle_animal(uint _points, uint _summoner) public view returns (uint points) {
+    function bonus_by_handle_animal(uint _points, uint _summoner) internal view returns (uint points) {
         uint8[36] memory _skills = skills.get_skills(_summoner);
-        uint handle_animal = uint(_skills[14]); //Handle animal
+        uint handle_animal = _skills[13]; //Handle animal
         points = _points + (handle_animal * 2);
     }
 
-    function bonus_by_attr(uint _points, uint _summoner) public view returns (uint points) {
+    function bonus_by_attr(uint _points, uint _summoner) internal view returns (uint points) {
         (,,,uint32 _int,uint32 _wis,uint32 _cha) = attr.ability_scores(_summoner);
         points = _points + ((_int + _wis + _cha) / 2);
     }
