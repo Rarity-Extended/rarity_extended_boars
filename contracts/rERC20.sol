@@ -3,8 +3,9 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IRarity.sol";
 import "./interfaces/IAttributes.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-abstract contract rERC20 {
+abstract contract rERC20 is AccessControl {
 
     string public name;
     string public symbol;
@@ -15,16 +16,18 @@ abstract contract rERC20 {
     IRarity public rm;
     address public minter;
 
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     constructor(string memory _name, string memory _symbol, address _rm){
         name = _name;
         symbol = _symbol;
         rm = IRarity(_rm);
+        _setupRole(ADMIN_ROLE, msg.sender);
     }
 
-    function setMinter(address _minter) external {
-        require(init_minter == false, "nope");
-        init_minter = true;
-        minter = _minter;
+    function setMinter(address _minter) external onlyRole(ADMIN_ROLE) {
+        _setupRole(MINTER_ROLE, _minter);
     }
 
     mapping(uint => mapping (uint => uint)) public allowance;
@@ -37,8 +40,7 @@ abstract contract rERC20 {
         return rm.getApproved(_summoner) == msg.sender || rm.ownerOf(_summoner) == msg.sender;
     }
 
-    function mint(uint dst, uint amount) external {
-        require(msg.sender == minter, "dont hack pls");
+    function mint(uint dst, uint amount) external onlyRole(MINTER_ROLE) {
         totalSupply += amount;
         balanceOf[dst] += amount;
         emit Transfer(dst, dst, amount);
