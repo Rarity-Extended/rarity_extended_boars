@@ -4,8 +4,9 @@ pragma solidity 0.8.7;
 import "./interfaces/IRarity.sol";
 import "./interfaces/IAttributes.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./onlyExtended.sol";
 
-abstract contract rERC20 is AccessControl {
+abstract contract rERC20 is AccessControl, OnlyExtended {
 
     string public name;
     string public symbol;
@@ -14,19 +15,16 @@ abstract contract rERC20 is AccessControl {
     bool public init_minter = false;
 
     IRarity public rm;
-    address public minter;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    constructor(string memory _name, string memory _symbol, address _rm){
+    constructor(string memory _name, string memory _symbol, address _rm) OnlyExtended() {
         name = _name;
         symbol = _symbol;
         rm = IRarity(_rm);
-        _setupRole(ADMIN_ROLE, msg.sender);
     }
 
-    function setMinter(address _minter) external onlyRole(ADMIN_ROLE) {
+    function setMinter(address _minter) external onlyExtended() {
         _setupRole(MINTER_ROLE, _minter);
     }
 

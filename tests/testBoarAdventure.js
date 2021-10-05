@@ -103,7 +103,7 @@ describe("BoarAdventure", function () {
         await expect(this.boarAdventure.reproduce(0, 1)).to.be.reverted;
         // console.log(boar_population_before);
 
-        // console.log(ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_reproduce()));
+        console.log(await this.boarAdventure.boost_reward_for_reproduce(ethers.utils.parseUnits("100", "wei")));
 
         await this.boarAdventure.reproduce(1, 2);
         // expect(await this.berries.balanceOf(1)).equal(sim1);
@@ -127,7 +127,7 @@ describe("BoarAdventure", function () {
         let sim = await this.boarAdventure.simulate_kill(0);
         // console.log("reward qty:", ethers.utils.formatUnits(sim.reward, "wei"), "reward type:", sim.reward_type);
 
-        // console.log(ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_kill()));
+        console.log(await this.boarAdventure.boost_reward_for_kill(ethers.utils.parseUnits("100", "wei")));
 
         await expect(this.boarAdventure.kill(0)).to.be.reverted;
         await network.provider.send("evm_increaseTime", [172800]);

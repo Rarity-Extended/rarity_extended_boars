@@ -6,15 +6,16 @@ import "./interfaces/IAttributes.sol";
 import "./interfaces/ISkills.sol";
 import "./interfaces/IrERC20.sol";
 import "./interfaces/IRandomCodex.sol";
+import "./onlyExtended.sol";
 
-contract boarAdventure {
+contract boarAdventure is OnlyExtended {
     
     int public constant dungeon_health = 16;
     int public constant dungeon_damage = 4;
     int public constant dungeon_to_hit = 5;
     int public constant dungeon_armor_class = 4;
     uint public boar_population = 10;
-    uint constant EXPECTED_BOARS = 10000;
+    uint public expected_boars = 10000;
     uint constant DAY = 1 days;
     mapping(uint => uint) public actions_log;
 
@@ -31,6 +32,7 @@ contract boarAdventure {
 
     event Reproduced(uint _summoner, uint reward_qty, uint litter, RewardReproduce RewardType);
     event Killed(uint _summoner, uint reward_qty_one, RewardKill RewardTypeOne, uint reward_qty_two, RewardKill RewardTypeTwo, uint reward_qty_three, RewardKill RewardTypeThree);
+    event ChangedExpectedBoars(uint former_expected_boars, uint new_expected_boars);
 
     enum RewardReproduce {
         None,
@@ -46,7 +48,7 @@ contract boarAdventure {
         Tusks
     }
     
-    constructor(address _rmAddr, address _attrAddr, address _skills, address _random, address _mushroom, address _berries, address _wood, address _leather, address _meat, address _tusks) {
+    constructor(address _rmAddr, address _attrAddr, address _skills, address _random, address _mushroom, address _berries, address _wood, address _leather, address _meat, address _tusks) OnlyExtended() {
         rm = IRarity(_rmAddr);
         attr = attributes(_attrAddr);
         skills = ISkills(_skills);
@@ -79,12 +81,70 @@ contract boarAdventure {
         return result;
     }
 
-    function boost_reward_for_kill() public view returns (uint) {
-        return boar_population / EXPECTED_BOARS;
+    function change_expected_boars(uint new_expected_boars) external onlyExtended {
+        uint former_expected_boars = expected_boars;
+        expected_boars = new_expected_boars;
+        emit ChangedExpectedBoars(former_expected_boars, new_expected_boars);
     }
 
-    function boost_reward_for_reproduce() public view returns (uint) {
-        return EXPECTED_BOARS / boar_population;
+    function calculate_percentaje(uint _total, uint _partial) public pure returns (uint) {
+        /*
+            Return what perc of _total is _partial
+        
+            100e18 = _total
+            x      = _partial
+        */
+        return (100e18 * _partial / _total);
+    }
+
+    function apply_percentaje(uint _perc, uint _total) public pure returns (uint) {
+        /*
+            Return what number is _perc of _total
+        
+            100e18 = _total
+            _perc  = x
+        */
+        return (_perc * _total / 100e18);
+    }
+
+    function boost_reward_for_kill(uint reward) public view returns (uint) {
+        if (boar_population > expected_boars) {
+            //Boost UP
+            uint perc = calculate_percentaje(boar_population, expected_boars);
+            perc = 100e18 - perc;
+            reward = reward + apply_percentaje(perc, reward);
+        }
+        if (expected_boars > boar_population) {
+            //Boost DOWN 
+            uint perc = calculate_percentaje(expected_boars, boar_population);
+            perc = 100e18 - perc;
+            reward = reward - apply_percentaje(perc, reward);
+        }
+        if (expected_boars == boar_population) {
+            //Minimum
+            reward = reward + apply_percentaje(1e18, reward);
+        }
+        return reward;
+    }
+
+    function boost_reward_for_reproduce(uint reward) public view returns (uint) {
+        if (boar_population > expected_boars) {
+            //Boost DOWN
+            uint perc = calculate_percentaje(boar_population, expected_boars);
+            perc = 100e18 - perc;
+            reward = reward - apply_percentaje(perc, reward);
+        }
+        if (expected_boars > boar_population) {
+            //Boost UP
+            uint perc = calculate_percentaje(expected_boars, boar_population);
+            perc = 100e18 - perc;
+            reward = reward + apply_percentaje(perc, reward);
+        }
+        if (expected_boars == boar_population) {
+            //Minimum
+            reward = reward + apply_percentaje(1e18, reward);
+        }
+        return reward;
     }
 
     /*KILL MECHANISM */
@@ -183,6 +243,8 @@ contract boarAdventure {
     }
 
     function _mint_reward_kill_internal(uint receiver, uint qty, RewardKill reward_type) internal {
+        qty = qty * 1e18;
+
         if (reward_type == RewardKill.Leather) {
             leather.mint(receiver, qty);
         }
@@ -241,12 +303,12 @@ contract boarAdventure {
     }
     
     function kill(uint _summoner) external {
-        require(boar_population > 0, "no boars to kill");
-        require(_isApprovedOrOwner(_summoner));
-        require(block.timestamp > actions_log[_summoner]);
+        require(boar_population > 0, "!boars");
+        require(_isApprovedOrOwner(_summoner), "!summoner");
+        require(block.timestamp > actions_log[_summoner], "!action");
         actions_log[_summoner] = block.timestamp + DAY;
         uint reward = simulate_kill(_summoner);
-        reward = reward * boost_reward_for_kill();
+        reward = boost_reward_for_kill(reward);
         (uint reward_qty_one, RewardKill RewardTypeOne, uint reward_qty_two, RewardKill RewardTypeTwo, uint reward_qty_three, RewardKill RewardTypeThree) = mint_reward_kill(_summoner, reward);
         boar_population -= 1;
         emit Killed(_summoner, reward_qty_one, RewardTypeOne, reward_qty_two, RewardTypeTwo, reward_qty_three, RewardTypeThree);
@@ -299,7 +361,9 @@ contract boarAdventure {
         points = _points + ((_int + _wis + _cha) / 2);
     }
 
-    function mint_reward_reproduce(uint receiver, uint qty, RewardReproduce reward) internal {
+    function _mint_reward_reproduce_internal(uint receiver, uint qty, RewardReproduce reward) internal {
+        qty = qty * 1e18;
+
         if (reward == RewardReproduce.Mushroom) {
             mushroom.mint(receiver, qty);
         }
@@ -314,8 +378,8 @@ contract boarAdventure {
     }
 
     function reproduce(uint _summoner, RewardReproduce expected_reward) external {
-        require(_isApprovedOrOwner(_summoner));
-        require(block.timestamp > actions_log[_summoner]);
+        require(_isApprovedOrOwner(_summoner), "!summoner");
+        require(block.timestamp > actions_log[_summoner], "!action");
         actions_log[_summoner] = block.timestamp + DAY;
         uint _level = rm.level(_summoner);
         uint _class = rm.class(_summoner);
@@ -323,8 +387,8 @@ contract boarAdventure {
         reward = multiplier_points_by_level(reward, _level);
         reward = bonus_by_handle_animal(reward, _summoner);
         reward = bonus_by_attr(reward, _summoner);
-        reward = reward * boost_reward_for_reproduce();
-        mint_reward_reproduce(_summoner, reward, expected_reward);
+        reward = boost_reward_for_reproduce(reward);
+        _mint_reward_reproduce_internal(_summoner, reward, expected_reward);
         uint litter = _get_random(_summoner, 12, false);
         boar_population += litter;
         emit Reproduced(_summoner, reward, litter, expected_reward);
