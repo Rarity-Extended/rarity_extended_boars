@@ -308,9 +308,11 @@ contract boarAdventure is OnlyExtended {
         require(block.timestamp > actions_log[_summoner], "!action");
         actions_log[_summoner] = block.timestamp + DAY;
         uint reward = simulate_kill(_summoner);
+        if (reward != 0) {
+            boar_population -= 1;
+        }
         reward = boost_reward_for_kill(reward);
         (uint reward_qty_one, RewardKill RewardTypeOne, uint reward_qty_two, RewardKill RewardTypeTwo, uint reward_qty_three, RewardKill RewardTypeThree) = mint_reward_kill(_summoner, reward);
-        boar_population -= 1;
         emit Killed(_summoner, reward_qty_one, RewardTypeOne, reward_qty_two, RewardTypeTwo, reward_qty_three, RewardTypeThree);
     }
 

@@ -45,7 +45,7 @@ abstract contract rERC20 is AccessControl, OnlyExtended {
     }
 
     function approve(uint from, uint spender, uint amount) external returns (bool) {
-        require(_isApprovedOrOwner(from));
+        require(_isApprovedOrOwner(from), "!owner");
         allowance[from][spender] = amount;
 
         emit Approval(from, spender, amount);
@@ -53,13 +53,13 @@ abstract contract rERC20 is AccessControl, OnlyExtended {
     }
 
     function transfer(uint from, uint to, uint amount) external returns (bool) {
-        require(_isApprovedOrOwner(from));
+        require(_isApprovedOrOwner(from), "!owner");
         _transferTokens(from, to, amount);
         return true;
     }
 
     function transferFrom(uint executor, uint from, uint to, uint amount) external returns (bool) {
-        require(_isApprovedOrOwner(executor));
+        require(_isApprovedOrOwner(executor), "!owner");
         uint spender = executor;
         uint spenderAllowance = allowance[from][spender];
 
