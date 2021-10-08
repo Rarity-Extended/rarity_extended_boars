@@ -10,7 +10,7 @@ describe("BoarAdventure", function () {
         //Mock rarity
         this.Rarity = await smock.mock('rarity');
         this.rarity = await this.Rarity.deploy();
-        await this.rarity.summon(1);
+        await this.rarity.summon(5);
         await this.rarity.summon(2);
         await this.rarity.summon(4);
         await this.rarity.connect(this.anotherSigner).summon(4);
@@ -20,11 +20,16 @@ describe("BoarAdventure", function () {
         this.attributes = await this.Attributes.deploy(this.rarity.address);
 
         //#0
+        await this.rarity.setVariable('level', {
+            0:5
+        });
+
+        //#0
         await this.attributes.setVariable('ability_scores', {
             0: {
-                strength: 1,
-                dexterity: 1,
-                constitution: 1,
+                strength: 16,
+                dexterity: 16,
+                constitution: 16,
                 intelligence: 16,
                 wisdom: 16,
                 charisma: 16,
@@ -141,6 +146,8 @@ describe("BoarAdventure", function () {
                 "wei")
                 );
 
+        // console.log("boar pop", boar_population_after);
+
         expect(boar_population_after).greaterThan(boar_population_before);
         expect(balanceRewardsAfter).greaterThan(balanceRewardsBefore);
         await expect(this.boarAdventure.reproduce(summId, 1)).to.be.reverted;
@@ -210,17 +217,35 @@ describe("BoarAdventure", function () {
 
     it("Should kill successfully...", async function () {
         let boar_population_before = await this.boarAdventure.boar_population();
-        let sim = await this.boarAdventure.simulate_kill(0);
 
-        // console.log(sim);
+        // console.log(ethers.utils.formatUnits(sim, "wei"));
+        // console.log(ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_kill(sim), "wei"));
 
         await expect(this.boarAdventure.kill(0)).to.be.reverted;
-        await network.provider.send("evm_increaseTime", [172800]); //Time travel, cause reproduced in above tests
+        await network.provider.send("evm_increaseTime", [172800]); //Time travel, because called "reproduce" in above tests
         await this.boarAdventure.kill(0);
-        // expect(boar_population_before - 1).equal(await this.boarAdventure.boar_population());
+        expect(boar_population_before - 1).equal(await this.boarAdventure.boar_population());
+
+        console.log("leather", Number(ethers.utils.formatUnits(await this.leather.balanceOf(0), "ether")));
+        console.log("meat", Number(ethers.utils.formatUnits(await this.meat.balanceOf(0), "ether")));
+        console.log("tusks", Number(ethers.utils.formatUnits(await this.tusks.balanceOf(0), "ether")));
     });
 
     it("Reward boost UP and DOWN should work successfully...", async function () {
+        let reward = ethers.utils.parseUnits("5");
+        let expected_boars = 0;
+
+        for (let i = 0; i < 50; i++) {
+            
+            // expected_boars = ethers.utils.formatUnits(await this.boarAdventure.expected_boars(), "wei");
+            // let reward_for_reproduce = ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_reproduce(reward), "wei");
+            // let reward_for_kill = ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_kill(reward), "wei");
+            // console.log(reward_for_reproduce);
+            // console.log(reward_for_kill);
+            // console.log(expected_boars);
+            // await this.boarAdventure.change_expected_boars(Number(expected_boars) - 100);
+
+        }
 
     });
 

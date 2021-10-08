@@ -65,19 +65,26 @@ contract boarAdventure is OnlyExtended {
         return rm.getApproved(_summoner) == msg.sender || rm.ownerOf(_summoner) == msg.sender;
     }
 
-    function _get_random(uint _summoner, uint limit, bool withZero) internal view returns (uint) {
-        //If withZero is TRUE, result include zero
+    function _get_random(uint _summoner, uint limit, bool withZero) public view returns (uint) {
+        _summoner += gasleft();
+
         uint result = 0;
+        //If withZero is TRUE, result include zero
 
         if (withZero) {
             //0 =< result < "limit"
             result = random.dn(_summoner, limit);
         }else{
             //1 =< result <= "limit"
-            result = random.dn(_summoner, limit - 1);
+
+            if (limit == 1) {
+                //If limit is 1, return the same (prevent divide by zero)
+                return 1;
+            }
+
+            result = random.dn(_summoner, limit);
             result += 1;
         }
-
         return result;
     }
 
@@ -108,6 +115,10 @@ contract boarAdventure is OnlyExtended {
     }
 
     function boost_reward_for_kill(uint reward) public view returns (uint) {
+        if (reward == 0){
+            return 0;
+        }
+
         if (boar_population > expected_boars) {
             //Boost UP
             uint perc = calculate_percentaje(boar_population, expected_boars);
@@ -128,6 +139,10 @@ contract boarAdventure is OnlyExtended {
     }
 
     function boost_reward_for_reproduce(uint reward) public view returns (uint) {
+        if (reward == 0){
+            return 0;
+        }
+
         if (boar_population > expected_boars) {
             //Boost DOWN
             uint perc = calculate_percentaje(boar_population, expected_boars);
@@ -243,8 +258,6 @@ contract boarAdventure is OnlyExtended {
     }
 
     function _mint_reward_kill_internal(uint receiver, uint qty, RewardKill reward_type) internal {
-        qty = qty * 1e18;
-
         if (reward_type == RewardKill.Leather) {
             leather.mint(receiver, qty);
         }
@@ -263,22 +276,27 @@ contract boarAdventure is OnlyExtended {
             return (0,RewardKill(0),0,RewardKill(0),0,RewardKill(0));
         }
 
+        uint toMint = 0;
+
         RewardTypeOne = RewardKill(_get_random(receiver, 3, false));
         reward_qty_one = _get_random(receiver, qty, false);
         qty -= reward_qty_one;
-        _mint_reward_kill_internal(receiver, qty, RewardTypeOne);
+        toMint = boost_reward_for_kill(reward_qty_one * 1e18);
+        _mint_reward_kill_internal(receiver, toMint, RewardTypeOne);
 
         if (qty == 0) return (reward_qty_one, RewardTypeOne, 0, RewardKill(0), 0, RewardKill(0));
 
         RewardTypeTwo = RewardKill(_get_random(receiver, 3, false));
         reward_qty_two = _get_random(receiver, qty, false);
         qty -= reward_qty_two;
-        _mint_reward_kill_internal(receiver, qty, RewardTypeOne);
+        toMint = boost_reward_for_kill(reward_qty_two * 1e18);
+        _mint_reward_kill_internal(receiver, toMint, RewardTypeTwo);
 
         if (qty == 0) return (reward_qty_one, RewardTypeOne, reward_qty_two, RewardTypeTwo, 0, RewardKill(0));
 
         RewardTypeThree = RewardKill(_get_random(receiver, 3, false));
-        _mint_reward_kill_internal(receiver, qty, RewardTypeOne);
+        toMint = boost_reward_for_kill(qty * 1e18);
+        _mint_reward_kill_internal(receiver, toMint, RewardTypeThree);
         
     }
 
@@ -311,7 +329,7 @@ contract boarAdventure is OnlyExtended {
         if (reward != 0) {
             boar_population -= 1;
         }
-        reward = boost_reward_for_kill(reward);
+
         (uint reward_qty_one, RewardKill RewardTypeOne, uint reward_qty_two, RewardKill RewardTypeTwo, uint reward_qty_three, RewardKill RewardTypeThree) = mint_reward_kill(_summoner, reward);
         emit Killed(_summoner, reward_qty_one, RewardTypeOne, reward_qty_two, RewardTypeTwo, reward_qty_three, RewardTypeThree);
     }
@@ -364,7 +382,6 @@ contract boarAdventure is OnlyExtended {
     }
 
     function _mint_reward_reproduce_internal(uint receiver, uint qty, RewardReproduce reward) internal {
-        qty = qty * 1e18;
 
         if (reward == RewardReproduce.Mushroom) {
             mushroom.mint(receiver, qty);
@@ -379,7 +396,7 @@ contract boarAdventure is OnlyExtended {
         }
     }
 
-    function reproduce(uint _summoner, RewardReproduce expected_reward) external {
+    function reproduce(uint _summoner, RewardReproduce expected_reward_type) external {
         require(_isApprovedOrOwner(_summoner), "!summoner");
         require(block.timestamp > actions_log[_summoner], "!action");
         actions_log[_summoner] = block.timestamp + DAY;
@@ -389,11 +406,11 @@ contract boarAdventure is OnlyExtended {
         reward = multiplier_points_by_level(reward, _level);
         reward = bonus_by_handle_animal(reward, _summoner);
         reward = bonus_by_attr(reward, _summoner);
-        reward = boost_reward_for_reproduce(reward);
-        _mint_reward_reproduce_internal(_summoner, reward, expected_reward);
+        reward = boost_reward_for_reproduce(reward * 1e18);
+        _mint_reward_reproduce_internal(_summoner, reward, expected_reward_type);
         uint litter = _get_random(_summoner, 12, false);
         boar_population += litter;
-        emit Reproduced(_summoner, reward, litter, expected_reward);
+        emit Reproduced(_summoner, reward, litter, expected_reward_type);
     }
 
 }
