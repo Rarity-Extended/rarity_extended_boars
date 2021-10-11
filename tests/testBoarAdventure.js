@@ -21,7 +21,7 @@ describe("BoarAdventure", function () {
 
         //#0
         await this.rarity.setVariable('level', {
-            0:5
+            0: 5
         });
 
         //#0
@@ -103,14 +103,14 @@ describe("BoarAdventure", function () {
         let boars_to_add = 10000;
 
         let expected_boars_before = ethers.utils.formatUnits(
-            await this.boarAdventure.expected_boars(), 
+            await this.boarAdventure.expected_boars(),
             "wei"
         );
 
         await this.boarAdventure.change_expected_boars(Number(expected_boars_before) + boars_to_add);
 
         let expected_boars_after = ethers.utils.formatUnits(
-            await this.boarAdventure.expected_boars(), 
+            await this.boarAdventure.expected_boars(),
             "wei"
         );
 
@@ -118,6 +118,13 @@ describe("BoarAdventure", function () {
 
         await expect(this.boarAdventure.connect(this.anotherSigner).change_expected_boars(boars_to_add)).to.be.revertedWith('!owner');
 
+    });
+
+    it("Should calculate percentaje successfully...", async function () {
+        let calculate_percentaje = ethers.utils.formatUnits(await this.boarAdventure.calculate_percentaje(ethers.utils.parseUnits("1000"), ethers.utils.parseUnits("20")));
+        expect(Number(calculate_percentaje)).equal(2);
+        let apply_percentaje = ethers.utils.formatUnits(await this.boarAdventure.apply_percentaje(ethers.utils.parseUnits("20"), ethers.utils.parseUnits("1000")));
+        expect(Number(apply_percentaje)).equal(200);
     });
 
     it("Should reproduce with summoner#0 successfully...", async function () {
@@ -128,23 +135,23 @@ describe("BoarAdventure", function () {
             ethers.utils.formatUnits(
                 await this.mushroom.balanceOf(summId),
                 "ether")
-                );
+        );
         let boar_population_before = Number(
             ethers.utils.formatUnits(
-                await this.boarAdventure.boar_population(), 
+                await this.boarAdventure.boar_population(),
                 "wei")
-                );
+        );
         await this.boarAdventure.reproduce(summId, 1);
         let balanceRewardsAfter = Number(
             ethers.utils.formatUnits(
-                await this.mushroom.balanceOf(summId), 
+                await this.mushroom.balanceOf(summId),
                 "ether")
-                );
+        );
         let boar_population_after = Number(
             ethers.utils.formatUnits(
-                await this.boarAdventure.boar_population(), 
+                await this.boarAdventure.boar_population(),
                 "wei")
-                );
+        );
 
         // console.log("boar pop", boar_population_after);
 
@@ -161,24 +168,24 @@ describe("BoarAdventure", function () {
             ethers.utils.formatUnits(
                 await this.berries.balanceOf(summId),
                 "ether")
-                );
+        );
         let boar_population_before = Number(
             ethers.utils.formatUnits(
-                await this.boarAdventure.boar_population(), 
+                await this.boarAdventure.boar_population(),
                 "wei")
-                );
+        );
         await this.boarAdventure.reproduce(summId, 2);
         let balanceRewardsAfter = Number(
             ethers.utils.formatUnits(
-                await this.berries.balanceOf(summId), 
+                await this.berries.balanceOf(summId),
                 "ether")
-                );
+        );
         let boar_population_after = Number(
             ethers.utils.formatUnits(
-                await this.boarAdventure.boar_population(), 
+                await this.boarAdventure.boar_population(),
                 "wei")
-                );
-        
+        );
+
         expect(boar_population_after).greaterThan(boar_population_before);
         expect(balanceRewardsAfter).greaterThan(balanceRewardsBefore);
         await expect(this.boarAdventure.reproduce(summId, 2)).to.be.reverted;
@@ -192,24 +199,24 @@ describe("BoarAdventure", function () {
             ethers.utils.formatUnits(
                 await this.wood.balanceOf(summId),
                 "ether")
-                );
+        );
         let boar_population_before = Number(
             ethers.utils.formatUnits(
-                await this.boarAdventure.boar_population(), 
+                await this.boarAdventure.boar_population(),
                 "wei")
-                );
+        );
         await this.boarAdventure.reproduce(summId, 3);
         let balanceRewardsAfter = Number(
             ethers.utils.formatUnits(
-                await this.wood.balanceOf(summId), 
+                await this.wood.balanceOf(summId),
                 "ether")
-                );
+        );
         let boar_population_after = Number(
             ethers.utils.formatUnits(
-                await this.boarAdventure.boar_population(), 
+                await this.boarAdventure.boar_population(),
                 "wei")
-                );
-        
+        );
+
         expect(boar_population_after).greaterThan(boar_population_before);
         expect(balanceRewardsAfter).greaterThan(balanceRewardsBefore);
         await expect(this.boarAdventure.reproduce(summId, 3)).to.be.reverted;
@@ -217,18 +224,21 @@ describe("BoarAdventure", function () {
 
     it("Should kill successfully...", async function () {
         let boar_population_before = await this.boarAdventure.boar_population();
-
-        // console.log(ethers.utils.formatUnits(sim, "wei"));
-        // console.log(ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_kill(sim), "wei"));
+        let leather_before = Number(ethers.utils.formatUnits(await this.leather.balanceOf(0)));
+        let meat_before = Number(ethers.utils.formatUnits(await this.meat.balanceOf(0)));
+        let tusks_before = Number(ethers.utils.formatUnits(await this.tusks.balanceOf(0)));
 
         await expect(this.boarAdventure.kill(0)).to.be.reverted;
         await network.provider.send("evm_increaseTime", [172800]); //Time travel, because called "reproduce" in above tests
         await this.boarAdventure.kill(0);
-        expect(boar_population_before - 1).equal(await this.boarAdventure.boar_population());
+        let leather_after = Number(ethers.utils.formatUnits(await this.leather.balanceOf(0)));
+        let meat_after = Number(ethers.utils.formatUnits(await this.meat.balanceOf(0)));
+        let tusks_after = Number(ethers.utils.formatUnits(await this.tusks.balanceOf(0)));
 
-        console.log("leather", Number(ethers.utils.formatUnits(await this.leather.balanceOf(0), "ether")));
-        console.log("meat", Number(ethers.utils.formatUnits(await this.meat.balanceOf(0), "ether")));
-        console.log("tusks", Number(ethers.utils.formatUnits(await this.tusks.balanceOf(0), "ether")));
+        expect(boar_population_before - 1).equal(await this.boarAdventure.boar_population());
+        expect(leather_after).greaterThanOrEqual(leather_before);
+        expect(meat_after).greaterThanOrEqual(meat_before);
+        expect(tusks_after).greaterThanOrEqual(tusks_before);
     });
 
     it("Reward boost UP and DOWN should work successfully...", async function () {
@@ -236,14 +246,11 @@ describe("BoarAdventure", function () {
         let expected_boars = 0;
 
         for (let i = 0; i < 50; i++) {
-            
-            // expected_boars = ethers.utils.formatUnits(await this.boarAdventure.expected_boars(), "wei");
-            // let reward_for_reproduce = ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_reproduce(reward), "wei");
-            // let reward_for_kill = ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_kill(reward), "wei");
-            // console.log(reward_for_reproduce);
-            // console.log(reward_for_kill);
-            // console.log(expected_boars);
-            // await this.boarAdventure.change_expected_boars(Number(expected_boars) - 100);
+
+            expected_boars = ethers.utils.formatUnits(await this.boarAdventure.expected_boars(), "wei");
+            let reward_for_reproduce = ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_reproduce(reward), "wei");
+            let reward_for_kill = ethers.utils.formatUnits(await this.boarAdventure.boost_reward_for_kill(reward), "wei");
+            await this.boarAdventure.change_expected_boars(Number(expected_boars) - 100);
 
         }
 
@@ -256,7 +263,7 @@ describe("BoarAdventure", function () {
         await this.mushroom.setMinter(this.anotherSigner2.address);
         await this.mushroom.connect(this.anotherSigner2).mint(summDst, ethers.utils.parseUnits("200000"));
     });
-    
+
     it("Should approve rERC20 successfully...", async function () {
         await expect(this.mushroom.connect(this.anotherSigner).approve(2, 3, ethers.utils.parseUnits("10000"))).to.be.revertedWith('!owner');
         await this.mushroom.approve(2, 3, ethers.utils.parseUnits("10000"));
@@ -273,4 +280,5 @@ describe("BoarAdventure", function () {
         await this.mushroom.transferFrom(2, 2, 3, ethers.utils.parseUnits("1000"));
         expect(Number(ethers.utils.formatUnits(await this.mushroom.balanceOf(3)))).equal(2000);
     });
+    
 });

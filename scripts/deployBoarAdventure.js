@@ -38,7 +38,18 @@ async function main() {
 
     //Deploy
     this.BoarAdventure = await ethers.getContractFactory("boarAdventure");
-    this.boarAdventure = await this.BoarAdventure.deploy(rarityAddr, attributesAddr, skillsAddr, randomCodexAddr, this.mushroom.address, this.berries.address, this.wood.address, this.leather.address, this.meat.address, this.tusks.address);
+    this.boarAdventure = await this.BoarAdventure.deploy(
+        rarityAddr, 
+        attributesAddr, 
+        skillsAddr, 
+        randomCodexAddr, 
+        this.mushroom.address, 
+        this.berries.address, 
+        this.wood.address, 
+        this.leather.address, 
+        this.meat.address, 
+        this.tusks.address
+    );
     await this.boarAdventure.deployed();
     console.log("Deployed BA to:", this.boarAdventure.address);
 
@@ -54,7 +65,18 @@ async function main() {
     //Verify
     await hre.run("verify:verify", {
         address: this.boarAdventure.address,
-        constructorArguments: [rarityAddr, attributesAddr, skillsAddr, randomCodexAddr, this.mushroom.address, this.berries.address, this.wood.address, this.leather.address, this.meat.address, this.tusks.address],
+        constructorArguments: [
+            rarityAddr, 
+            attributesAddr, 
+            skillsAddr, 
+            randomCodexAddr, 
+            this.mushroom.address, 
+            this.berries.address, 
+            this.wood.address, 
+            this.leather.address, 
+            this.meat.address, 
+            this.tusks.address
+        ],
     });
 
     await hre.run("verify:verify", {
