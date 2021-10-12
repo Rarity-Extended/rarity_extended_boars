@@ -115,6 +115,7 @@ contract boarAdventure is OnlyExtended {
     }
 
     function boost_reward_for_kill(uint reward) public view returns (uint) {
+        //Boost (+ o -) reward for killing
         if (reward == 0){
             return 0;
         }
@@ -139,6 +140,7 @@ contract boarAdventure is OnlyExtended {
     }
 
     function boost_reward_for_reproduce(uint reward) public view returns (uint) {
+        //Boost (+ o -) reward for reproducing
         if (reward == 0){
             return 0;
         }
@@ -272,6 +274,7 @@ contract boarAdventure is OnlyExtended {
     }
 
     function mint_reward_kill(uint receiver, uint qty) internal returns (uint reward_qty_one, RewardKill RewardTypeOne, uint reward_qty_two, RewardKill RewardTypeTwo, uint reward_qty_three, RewardKill RewardTypeThree) {
+        //Mint random rewards based on "qty" parm
         if (qty == 0) {
             return (0,RewardKill(0),0,RewardKill(0),0,RewardKill(0));
         }
@@ -321,6 +324,7 @@ contract boarAdventure is OnlyExtended {
     }
     
     function kill(uint _summoner) external {
+        //Kill one boar, rewards are random
         require(boar_population > 0, "!boars");
         require(_isApprovedOrOwner(_summoner), "!summoner");
         require(block.timestamp > actions_log[_summoner], "!action");
@@ -371,13 +375,14 @@ contract boarAdventure is OnlyExtended {
     }
 
     function bonus_by_handle_animal(uint _points, uint _summoner) internal view returns (uint points) {
+        //If you have "Handle animal" skill, you receive a bonus
         uint8[36] memory _skills = skills.get_skills(_summoner);
         uint handle_animal = _skills[13]; //Handle animal
         points = _points + (handle_animal * 2);
     }
 
     function bonus_by_attr(uint _points, uint _summoner) internal view returns (uint points) {
-        (,,,uint32 _int,uint32 _wis,uint32 _cha) = attr.ability_scores(_summoner);
+        (,,,uint32 _int, uint32 _wis, uint32 _cha) = attr.ability_scores(_summoner);
         points = _points + ((_int + _wis + _cha) / 2);
     }
 
@@ -397,6 +402,7 @@ contract boarAdventure is OnlyExtended {
     }
 
     function reproduce(uint _summoner, RewardReproduce expected_reward_type) external {
+        //Reproduce a boars, born a litter (1-12 boars), rewards are eligible
         require(_isApprovedOrOwner(_summoner), "!summoner");
         require(block.timestamp > actions_log[_summoner], "!action");
         actions_log[_summoner] = block.timestamp + DAY;

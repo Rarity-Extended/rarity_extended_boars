@@ -116,14 +116,26 @@ describe("BoarAdventure", function () {
 
         expect(Number(expected_boars_after)).equal(Number(expected_boars_before) + boars_to_add);
 
-        await expect(this.boarAdventure.connect(this.anotherSigner).change_expected_boars(boars_to_add)).to.be.revertedWith('!owner');
+        await expect(this.boarAdventure.connect(this.anotherSigner)
+            .change_expected_boars(boars_to_add))
+            .to.be.revertedWith('!owner');
 
     });
 
     it("Should calculate percentaje successfully...", async function () {
-        let calculate_percentaje = ethers.utils.formatUnits(await this.boarAdventure.calculate_percentaje(ethers.utils.parseUnits("1000"), ethers.utils.parseUnits("20")));
+        let calculate_percentaje = ethers.utils.formatUnits(
+            await this.boarAdventure.calculate_percentaje(
+                ethers.utils.parseUnits("1000"),
+                ethers.utils.parseUnits("20")
+            )
+        );
         expect(Number(calculate_percentaje)).equal(2);
-        let apply_percentaje = ethers.utils.formatUnits(await this.boarAdventure.apply_percentaje(ethers.utils.parseUnits("20"), ethers.utils.parseUnits("1000")));
+        let apply_percentaje = ethers.utils.formatUnits(
+            await this.boarAdventure.apply_percentaje(
+                ethers.utils.parseUnits("20"),
+                ethers.utils.parseUnits("1000")
+            )
+        );
         expect(Number(apply_percentaje)).equal(200);
     });
 
@@ -259,26 +271,41 @@ describe("BoarAdventure", function () {
     it("Should setMinter rERC20 successfully...", async function () {
         let summDst = 2;
 
-        await expect(this.mushroom.connect(this.anotherSigner).setMinter(this.anotherSigner2.address)).to.be.revertedWith('!owner');
+        await expect(
+            this.mushroom.connect(this.anotherSigner)
+                .setMinter(this.anotherSigner2.address)
+        ).to.be.revertedWith('!owner');
         await this.mushroom.setMinter(this.anotherSigner2.address);
         await this.mushroom.connect(this.anotherSigner2).mint(summDst, ethers.utils.parseUnits("200000"));
     });
 
     it("Should approve rERC20 successfully...", async function () {
-        await expect(this.mushroom.connect(this.anotherSigner).approve(2, 3, ethers.utils.parseUnits("10000"))).to.be.revertedWith('!owner');
+        await expect(
+            this.mushroom.connect(this.anotherSigner)
+                .approve(2, 3, ethers.utils.parseUnits("10000")))
+            .to.be.revertedWith('!owner');
         await this.mushroom.approve(2, 3, ethers.utils.parseUnits("10000"));
     });
 
     it("Should transfer rERC20 successfully...", async function () {
-        await expect(this.mushroom.connect(this.anotherSigner).transfer(2, 3, ethers.utils.parseUnits("1000"))).to.be.revertedWith('!owner');
+        await expect(
+            this.mushroom.connect(this.anotherSigner)
+                .transfer(2, 3, ethers.utils.parseUnits("1000")))
+            .to.be.revertedWith('!owner');
         await this.mushroom.transfer(2, 3, ethers.utils.parseUnits("1000"));
     });
 
     it("Should transferFrom rERC20 successfully...", async function () {
-        await expect(this.mushroom.connect(this.anotherSigner).transferFrom(2, 2, 3, ethers.utils.parseUnits("1000"))).to.be.revertedWith('!owner');
-        await expect(this.mushroom.connect(this.anotherSigner).transferFrom(3, 2, 3, ethers.utils.parseUnits("100000"))).to.be.revertedWith('reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)');
+        await expect(
+            this.mushroom.connect(this.anotherSigner)
+                .transferFrom(2, 2, 3, ethers.utils.parseUnits("1000")))
+            .to.be.revertedWith('!owner');
+        await expect(
+            this.mushroom.connect(this.anotherSigner)
+                .transferFrom(3, 2, 3, ethers.utils.parseUnits("100000")))
+            .to.be.revertedWith('reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)');
         await this.mushroom.transferFrom(2, 2, 3, ethers.utils.parseUnits("1000"));
         expect(Number(ethers.utils.formatUnits(await this.mushroom.balanceOf(3)))).equal(2000);
     });
-    
+
 });
