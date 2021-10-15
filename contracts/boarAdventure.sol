@@ -151,8 +151,8 @@ contract BaseMechanisms {
 }
 
 contract boarAdventure is OnlyExtended, BaseMechanisms {
-    uint public boar_population = 10000;
-    uint public expected_boars = 10000;
+    uint public boar_population = 20_000;
+    uint public expected_boars = 10_000;
     uint constant DAY = 1 days;
     mapping(uint => uint) public actions_log;
 
@@ -229,72 +229,28 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         emit ChangedExpectedBoars(former_expected_boars, new_expected_boars);
     }
 
-    function calculate_percentage(uint _total, uint _partial) public pure returns (uint) {
-        /*
-            Return what perc of _total is _partial
-        
-            100e18 = _total
-            x      = _partial
-        */
-        return (100e18 * _partial / _total);
-    }
-
-    function apply_percentage(uint _perc, uint _total) public pure returns (uint) {
-        /*
-            Return what number is _perc of _total
-        
-            100e18 = _total
-            _perc  = x
-        */
-        return (_perc * _total / 100e18);
-    }
-
-    function boost_reward_for_kill(uint reward) public view returns (uint) {
-        //Boost (+ o -) reward for killing
-        if (reward == 0){
+    function boost_reward_for_kill(uint reward, uint pop, uint expected) public view returns (uint) {
+        if (reward == 0) {
             return 0;
         }
-
-        if (boar_population > expected_boars) {
-            //Boost UP
-            uint perc = calculate_percentage(boar_population, expected_boars);
-            perc = 100e18 - perc;
-            reward = reward + apply_percentage(perc, reward);
+        if (pop > expected) {
+            reward += reward * (pop - expected) / expected;
         }
-        if (expected_boars > boar_population) {
-            //Boost DOWN 
-            uint perc = calculate_percentage(expected_boars, boar_population);
-            perc = 100e18 - perc;
-            reward = reward - apply_percentage(perc, reward);
-        }
-        if (expected_boars == boar_population) {
-            //Minimum
-            reward = reward + apply_percentage(1e18, reward);
+        if (pop < expected) {
+            reward = reward * pop / expected;
         }
         return reward;
     }
 
-    function boost_reward_for_reproduce(uint reward) public view returns (uint) {
-        //Boost (+ o -) reward for reproducing
-        if (reward == 0){
+   function boost_reward_for_reproduce(uint reward, uint pop, uint expected) public view returns (uint) {
+        if (reward == 0) {
             return 0;
         }
-
-        if (boar_population > expected_boars) {
-            //Boost DOWN
-            uint perc = calculate_percentage(boar_population, expected_boars);
-            perc = 100e18 - perc;
-            reward = reward - apply_percentage(perc, reward);
+        if (pop > expected) {
+            reward /= (pop / expected * 2);
         }
-        if (expected_boars > boar_population) {
-            //Boost UP
-            uint perc = calculate_percentage(expected_boars, boar_population);
-            perc = 100e18 - perc;
-            reward = reward + apply_percentage(perc, reward);
-        }
-        if (expected_boars == boar_population) {
-            //Minimum
-            reward = reward + apply_percentage(1e18, reward);
+        if (pop < expected) {
+            reward += reward * (expected - pop) / pop;
         }
         return reward;
     }
@@ -326,7 +282,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         RewardTypeOne = RewardKill(_get_random(receiver, 3, false));
         reward_qty_one = _get_random(receiver, qty, false);
         qty -= reward_qty_one;
-        toMint = boost_reward_for_kill(reward_qty_one);
+        toMint = boost_reward_for_kill(reward_qty_one, boar_population, expected_boars);
         _mint_reward_kill_internal(receiver, toMint, RewardTypeOne);
 
         if (qty == 0) return (reward_qty_one, RewardTypeOne, 0, RewardKill(0), 0, RewardKill(0));
@@ -334,13 +290,13 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         RewardTypeTwo = RewardKill(_get_random(receiver, 3, false));
         reward_qty_two = _get_random(receiver, qty, false);
         qty -= reward_qty_two;
-        toMint = boost_reward_for_kill(reward_qty_two);
+        toMint = boost_reward_for_kill(reward_qty_two, boar_population, expected_boars);
         _mint_reward_kill_internal(receiver, toMint, RewardTypeTwo);
 
         if (qty == 0) return (reward_qty_one, RewardTypeOne, reward_qty_two, RewardTypeTwo, 0, RewardKill(0));
 
         RewardTypeThree = RewardKill(_get_random(receiver, 3, false));
-        toMint = boost_reward_for_kill(qty);
+        toMint = boost_reward_for_kill(qty, boar_population, expected_boars);
         _mint_reward_kill_internal(receiver, toMint, RewardTypeThree);
     }
 
@@ -406,7 +362,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         uint reward = base_points_by_class(rm.class(_summoner));
         reward = bonus_by_handle_animal(reward, _summoner);
         reward = bonus_by_attr(reward, _summoner);
-        reward = boost_reward_for_reproduce(reward);
+        reward = boost_reward_for_reproduce(reward, boar_population, expected_boars);
         _mint_reward_reproduce_internal(_summoner, reward, _reward_type);
         uint litter = _get_random(_summoner, 6, false);
         boar_population += litter;
