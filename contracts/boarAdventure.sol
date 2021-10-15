@@ -229,7 +229,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         emit ChangedExpectedBoars(former_expected_boars, new_expected_boars);
     }
 
-    function boost_reward_for_kill(uint reward, uint pop, uint expected) public view returns (uint) {
+    function boost_reward_for_kill(uint reward, uint pop, uint expected) public pure returns (uint) {
         if (reward == 0) {
             return 0;
         }
@@ -242,7 +242,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         return reward;
     }
 
-   function boost_reward_for_reproduce(uint reward, uint pop, uint expected) public view returns (uint) {
+    function boost_reward_for_reproduce(uint reward, uint pop, uint expected) public pure returns (uint) {
         if (reward == 0) {
             return 0;
         }
