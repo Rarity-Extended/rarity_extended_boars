@@ -12,7 +12,6 @@ abstract contract rERC20 is AccessControl, OnlyExtended {
     string public symbol;
     uint8 public constant decimals = 18;
     uint public totalSupply = 0;
-    bool public init_minter = false;
 
     IRarity public rm;
 
@@ -35,7 +34,7 @@ abstract contract rERC20 is AccessControl, OnlyExtended {
     event Approval(uint indexed from, uint indexed to, uint amount);
 
     function _isApprovedOrOwner(uint _summoner) internal view returns (bool) {
-        return rm.getApproved(_summoner) == msg.sender || rm.ownerOf(_summoner) == msg.sender;
+        return rm.getApproved(_summoner) == msg.sender || rm.ownerOf(_summoner) == msg.sender || rm.isApprovedForAll(rm.ownerOf(_summoner), msg.sender);
     }
 
     function mint(uint dst, uint amount) external onlyRole(MINTER_ROLE) {
