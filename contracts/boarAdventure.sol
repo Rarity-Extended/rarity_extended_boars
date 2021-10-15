@@ -334,7 +334,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         RewardTypeOne = RewardKill(_get_random(receiver, 3, false));
         reward_qty_one = _get_random(receiver, qty, false);
         qty -= reward_qty_one;
-        toMint = boost_reward_for_kill(reward_qty_one * 1e18);
+        toMint = boost_reward_for_kill(reward_qty_one);
         _mint_reward_kill_internal(receiver, toMint, RewardTypeOne);
 
         if (qty == 0) return (reward_qty_one, RewardTypeOne, 0, RewardKill(0), 0, RewardKill(0));
@@ -342,13 +342,13 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         RewardTypeTwo = RewardKill(_get_random(receiver, 3, false));
         reward_qty_two = _get_random(receiver, qty, false);
         qty -= reward_qty_two;
-        toMint = boost_reward_for_kill(reward_qty_two * 1e18);
+        toMint = boost_reward_for_kill(reward_qty_two);
         _mint_reward_kill_internal(receiver, toMint, RewardTypeTwo);
 
         if (qty == 0) return (reward_qty_one, RewardTypeOne, reward_qty_two, RewardTypeTwo, 0, RewardKill(0));
 
         RewardTypeThree = RewardKill(_get_random(receiver, 3, false));
-        toMint = boost_reward_for_kill(qty * 1e18);
+        toMint = boost_reward_for_kill(qty);
         _mint_reward_kill_internal(receiver, toMint, RewardTypeThree);
         
     }
@@ -415,7 +415,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         reward = multiplier_points_by_level(reward, _level);
         reward = bonus_by_handle_animal(reward, _summoner);
         reward = bonus_by_attr(reward, _summoner);
-        reward = boost_reward_for_reproduce(reward * 1e18);
+        reward = boost_reward_for_reproduce(reward);
         _mint_reward_reproduce_internal(_summoner, reward, expected_reward_type);
         uint litter = _get_random(_summoner, 12, false);
         boar_population += litter;
