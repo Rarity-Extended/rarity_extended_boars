@@ -54,12 +54,12 @@ async function main() {
     console.log("Deployed BA to:", this.boarAdventure.address);
 
     //Setting minter
-    await this.mushroom.setMinter(this.boarAdventure.address);
-    await this.berries.setMinter(this.boarAdventure.address);
-    await this.wood.setMinter(this.boarAdventure.address);
-    await this.leather.setMinter(this.boarAdventure.address);
-    await this.meat.setMinter(this.boarAdventure.address);
-    await this.tusks.setMinter(this.boarAdventure.address);
+    await (await this.mushroom.setMinter(this.boarAdventure.address)).wait();
+    await (await this.berries.setMinter(this.boarAdventure.address)).wait();
+    await (await this.wood.setMinter(this.boarAdventure.address)).wait();
+    await (await this.leather.setMinter(this.boarAdventure.address)).wait();
+    await (await this.meat.setMinter(this.boarAdventure.address)).wait();
+    await (await this.tusks.setMinter(this.boarAdventure.address)).wait();
     console.log("Minter setted up successfully to:", this.boarAdventure.address);
 
     //Verify

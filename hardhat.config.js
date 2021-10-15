@@ -18,13 +18,17 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: rpc,
-        timeout: 200000,
-        enabled: false
+        url: 'https://rpc.ftm.tools',
       }
     },
+    localhost: {
+      url: "http://localhost:8545",
+      timeout: 2000000000,
+      accounts: [privateKey]
+    },
     fantom: {
-      url: rpc,
+      chainId: 250,
+      url: 'https://rpc.ftm.tools',
       accounts: [privateKey]
     }
   },

@@ -43,7 +43,7 @@ contract BaseMechanisms {
         }
     }
     
-    function health_by_class_and_level(uint _class, uint _level, uint32 _const) internal pure returns (uint health) {
+    function health_by_class_and_level(uint _class, uint _level, uint32 _const) public pure returns (uint health) {
         int _mod = modifier_for_attribute(_const);
         int _base_health = int(health_by_class(_class)) + _mod;
         if (_base_health <= 0) {
@@ -78,7 +78,7 @@ contract BaseMechanisms {
         }
     }
     
-    function base_attack_bonus_by_class_and_level(uint _class, uint _level) internal pure returns (uint) {
+    function base_attack_bonus_by_class_and_level(uint _class, uint _level) public pure returns (uint) {
         return _level * base_attack_bonus_by_class(_class) / 4;
     }
     
@@ -89,7 +89,7 @@ contract BaseMechanisms {
         return (int(_attribute) - 10) / 2;
     }
     
-    function attack_bonus(uint _class, uint _str, uint _level) internal pure returns (int) {
+    function attack_bonus(uint _class, uint _str, uint _level) public pure returns (int) {
         return  int(base_attack_bonus_by_class_and_level(_class, _level)) + modifier_for_attribute(_str);
     }
     
@@ -97,7 +97,7 @@ contract BaseMechanisms {
         return (_attack_bonus > dungeon_armor_class);
     }
     
-    function damage(uint _str) internal pure returns (uint) {
+    function damage(uint _str) public pure returns (uint) {
         int _mod = modifier_for_attribute(_str);
         if (_mod <= 1) {
             return 1;
@@ -106,7 +106,7 @@ contract BaseMechanisms {
         }
     }
     
-    function armor_class(uint _dex) internal pure returns (int) {
+    function armor_class(uint _dex) public pure returns (int) {
         return modifier_for_attribute(_dex);
     }
 
@@ -134,14 +134,6 @@ contract BaseMechanisms {
             points = 1;
         } else if (_class == 11) {
             points = 2;
-        }
-    }
-
-    function multiplier_points_by_level(uint _points, uint level) internal pure returns (uint points) {
-        if (level == 0) {
-            return _points;
-        }else{
-            points = _points * level;
         }
     }
 
@@ -334,7 +326,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         RewardTypeOne = RewardKill(_get_random(receiver, 3, false));
         reward_qty_one = _get_random(receiver, qty, false);
         qty -= reward_qty_one;
-        toMint = boost_reward_for_kill(reward_qty_one * 1e18);
+        toMint = boost_reward_for_kill(reward_qty_one);
         _mint_reward_kill_internal(receiver, toMint, RewardTypeOne);
 
         if (qty == 0) return (reward_qty_one, RewardTypeOne, 0, RewardKill(0), 0, RewardKill(0));
@@ -342,15 +334,14 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         RewardTypeTwo = RewardKill(_get_random(receiver, 3, false));
         reward_qty_two = _get_random(receiver, qty, false);
         qty -= reward_qty_two;
-        toMint = boost_reward_for_kill(reward_qty_two * 1e18);
+        toMint = boost_reward_for_kill(reward_qty_two);
         _mint_reward_kill_internal(receiver, toMint, RewardTypeTwo);
 
         if (qty == 0) return (reward_qty_one, RewardTypeOne, reward_qty_two, RewardTypeTwo, 0, RewardKill(0));
 
         RewardTypeThree = RewardKill(_get_random(receiver, 3, false));
-        toMint = boost_reward_for_kill(qty * 1e18);
+        toMint = boost_reward_for_kill(qty);
         _mint_reward_kill_internal(receiver, toMint, RewardTypeThree);
-        
     }
 
     function simulate_kill(uint _summoner) public view returns (uint reward) {
@@ -404,22 +395,22 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         }
     }
 
-    function reproduce(uint _summoner, RewardReproduce expected_reward_type) external {
+    function reproduce(uint _summoner) external {
         //Reproduce a boars, born a litter (1-12 boars), rewards are eligible
         require(_isApprovedOrOwner(_summoner), "!summoner");
         require(block.timestamp > actions_log[_summoner], "!action");
         actions_log[_summoner] = block.timestamp + DAY;
-        uint _level = rm.level(_summoner);
-        uint _class = rm.class(_summoner);
-        uint reward = base_points_by_class(_class);
-        reward = multiplier_points_by_level(reward, _level);
+
+        RewardReproduce _reward_type = RewardReproduce(_get_random(_summoner, 3, false));
+
+        uint reward = base_points_by_class(rm.class(_summoner));
         reward = bonus_by_handle_animal(reward, _summoner);
         reward = bonus_by_attr(reward, _summoner);
-        reward = boost_reward_for_reproduce(reward * 1e18);
-        _mint_reward_reproduce_internal(_summoner, reward, expected_reward_type);
-        uint litter = _get_random(_summoner, 12, false);
+        reward = boost_reward_for_reproduce(reward);
+        _mint_reward_reproduce_internal(_summoner, reward, _reward_type);
+        uint litter = _get_random(_summoner, 6, false);
         boar_population += litter;
-        emit Reproduced(_summoner, reward, litter, expected_reward_type);
+        emit Reproduced(_summoner, reward, litter, _reward_type);
     }
 
 }
