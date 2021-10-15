@@ -197,7 +197,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
     }
 
     function _isApprovedOrOwner(uint _summoner) internal view returns (bool) {
-        return rm.getApproved(_summoner) == msg.sender || rm.ownerOf(_summoner) == msg.sender;
+        return rm.getApproved(_summoner) == msg.sender || rm.ownerOf(_summoner) == msg.sender || rm.isApprovedForAll(rm.ownerOf(_summoner), msg.sender);
     }
 
     function _get_random(uint _summoner, uint limit, bool withZero) public view returns (uint) {
@@ -396,7 +396,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
     }
 
     function reproduce(uint _summoner) external {
-        //Reproduce a boars, born a litter (1-12 boars), rewards are eligible
+        //Reproduce a boars, born a litter (1-6 boars), rewards are eligible
         require(_isApprovedOrOwner(_summoner), "!summoner");
         require(block.timestamp > actions_log[_summoner], "!action");
         actions_log[_summoner] = block.timestamp + DAY;
