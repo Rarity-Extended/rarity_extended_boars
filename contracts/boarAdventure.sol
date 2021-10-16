@@ -165,7 +165,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
     IrERC20 public meat;
     IrERC20 public tusks;
 
-    event Reproduced(uint _summoner, uint reward_qty, uint litter, RewardReproduce RewardType);
+    event Reproduced(uint _summoner, uint reward_qty_one, RewardReproduce RewardTypeOne, uint reward_qty_two, RewardReproduce RewardTypeTwo, uint reward_qty_three, RewardReproduce RewardTypeThree, uint litter);
     event Killed(uint _summoner, uint reward_qty_one, RewardKill RewardTypeOne, uint reward_qty_two, RewardKill RewardTypeTwo, uint reward_qty_three, RewardKill RewardTypeThree);
     event ChangedExpectedBoars(uint former_expected_boars, uint new_expected_boars);
 
@@ -350,6 +350,42 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
             wood.mint(receiver, qty);
         }
     }
+    function mint_reward_reproduce(uint receiver, uint qty) internal returns (uint reward_qty_one, RewardReproduce rewardTypeOne, uint reward_qty_two, RewardReproduce rewardTypeTwo, uint reward_qty_three, RewardReproduce rewardTypeThree) {
+        //Mint random rewards based on "qty" parm
+        if (qty == 0)
+            return (0,RewardReproduce(0),0,RewardReproduce(0),0,RewardReproduce(0));
+
+        uint toMint = 0;
+
+        rewardTypeOne = RewardReproduce(_get_random(receiver, 3, false));
+        reward_qty_one = _get_random(receiver, qty, false);
+        qty -= reward_qty_one;
+        toMint = boost_reward_for_reproduce(reward_qty_one, boar_population, expected_boars);
+        _mint_reward_reproduce_internal(receiver, toMint, rewardTypeOne);
+
+        if (qty == 0)
+            return (reward_qty_one, rewardTypeOne, 0, RewardReproduce(0), 0, RewardReproduce(0));
+
+        rewardTypeTwo = RewardReproduce(_get_random(receiver, 3, false));
+        reward_qty_two = _get_random(receiver, qty, false);
+        qty -= reward_qty_two;
+        toMint = boost_reward_for_reproduce(reward_qty_two, boar_population, expected_boars);
+        _mint_reward_reproduce_internal(receiver, toMint, rewardTypeTwo);
+
+        if (qty == 0)
+            return (reward_qty_one, rewardTypeOne, reward_qty_two, rewardTypeTwo, 0, RewardReproduce(0));
+
+        rewardTypeThree = RewardReproduce(_get_random(receiver, 3, false));
+        toMint = boost_reward_for_reproduce(qty, boar_population, expected_boars);
+        _mint_reward_reproduce_internal(receiver, toMint, rewardTypeThree);
+    }
+
+    function simulate_reproduce(uint _summoner) public view returns (uint reward) {
+        reward = base_points_by_class(rm.class(_summoner));
+        reward = bonus_by_handle_animal(reward, _summoner);
+        reward = bonus_by_attr(reward, _summoner);
+        reward = boost_reward_for_reproduce(reward, boar_population, expected_boars);
+    }
 
     function reproduce(uint _summoner) external {
         //Reproduce a boars, born a litter (1-6 boars), rewards are eligible
@@ -357,16 +393,25 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         require(block.timestamp > actions_log[_summoner], "!action");
         actions_log[_summoner] = block.timestamp + DAY;
 
-        RewardReproduce _reward_type = RewardReproduce(_get_random(_summoner, 3, false));
 
         uint reward = base_points_by_class(rm.class(_summoner));
         reward = bonus_by_handle_animal(reward, _summoner);
         reward = bonus_by_attr(reward, _summoner);
-        reward = boost_reward_for_reproduce(reward, boar_population, expected_boars);
-        _mint_reward_reproduce_internal(_summoner, reward, _reward_type);
+        (uint reward_qty_one, RewardReproduce rewardTypeOne, uint reward_qty_two, RewardReproduce rewardTypeTwo, uint reward_qty_three, RewardReproduce rewardTypeThree) = mint_reward_reproduce(_summoner, reward);
+
         uint litter = _get_random(_summoner, 6, false);
         boar_population += litter;
-        emit Reproduced(_summoner, reward, litter, _reward_type);
-    }
 
+        emit Reproduced(
+            _summoner,
+            reward_qty_one,
+            rewardTypeOne,
+            reward_qty_two,
+            rewardTypeTwo,
+            reward_qty_three,
+            rewardTypeThree,
+            litter
+        );
+
+    }
 }
