@@ -410,7 +410,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         reward = bonus_by_attr(reward, _summoner);
         (uint reward_qty_one, RewardReproduce rewardTypeOne, uint reward_qty_two, RewardReproduce rewardTypeTwo, uint reward_qty_three, RewardReproduce rewardTypeThree) = mint_reward_reproduce(_summoner, reward);
 
-        uint litter = _get_random(_summoner, 6, false);
+        uint litter = _get_random(_summoner, 3, false);
         boar_population += litter;
 
         emit Reproduced(
