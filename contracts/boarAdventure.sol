@@ -153,6 +153,8 @@ contract BaseMechanisms {
 contract boarAdventure is OnlyExtended, BaseMechanisms {
     uint public boar_population = 20_000;
     uint public expected_boars = 10_000;
+    uint public extinction = 0;
+    uint public extinctionBy = 0;
     uint constant DAY = 1 days;
     mapping(uint => uint) public actions_log;
 
@@ -329,6 +331,10 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         uint reward = simulate_kill(_summoner);
         if (reward != 0) {
             boar_population -= 1;
+            if (boar_population == 0) {
+                extinction = block.timestamp;
+                extinctionBy = _summoner;
+            }
         }
 
         (uint reward_qty_one, RewardKill RewardTypeOne, uint reward_qty_two, RewardKill RewardTypeTwo, uint reward_qty_three, RewardKill RewardTypeThree) = mint_reward_kill(_summoner, reward);
