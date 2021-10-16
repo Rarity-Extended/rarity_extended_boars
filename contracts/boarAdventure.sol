@@ -156,6 +156,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
     uint public extinction = 0;
     uint public extinctionBy = 0;
     uint constant DAY = 1 days;
+    uint constant MAX_BOARS_REWARD = 20_000;
     mapping(uint => uint) public actions_log;
 
     IRarity public rm;
@@ -249,7 +250,11 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
             return 0;
         }
         if (pop > expected) {
-            reward /= (pop / expected * 2);
+            if (pop < MAX_BOARS_REWARD) {
+                reward -= reward * pop / MAX_BOARS_REWARD;
+            } else {
+                reward = 0;
+            }
         }
         if (pop < expected) {
             reward += reward * (expected - pop) / pop;
