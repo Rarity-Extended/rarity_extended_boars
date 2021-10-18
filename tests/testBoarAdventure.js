@@ -244,57 +244,57 @@ describe("BoarAdventure", function () {
     it("Reward boost UP and DOWN should work successfully...", async function () {
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 10_000, 10_000));
-            console.log({'5 reward with 10_000 boars when limit should be 10_000': reward_for_kill})
+            console.log({ '5 reward with 10_000 boars when limit should be 10_000': reward_for_kill })
         }
 
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 5_000, 10_000));
-            console.log({'5 reward with 5_000 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 5_000 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 4_000, 10_000));
-            console.log({'5 reward with 4_000 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 4_000 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 3_000, 10_000));
-            console.log({'5 reward with 3_000 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 3_000 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 2_000, 10_000));
-            console.log({'5 reward with 2_000 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 2_000 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 1_000, 10_000));
-            console.log({'5 reward with 1_000 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 1_000 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 500, 10_000));
-            console.log({'5 reward with 500 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 500 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 250, 10_000));
-            console.log({'5 reward with 250 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 250 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 100, 10_000));
-            console.log({'5 reward with 100 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 100 boars when limit should be 10_000 ': reward_for_kill })
         }
 
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 15_000, 10_000));
-            console.log({'5 reward with 15_000 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 15_000 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 20_000, 10_000));
-            console.log({'5 reward with 20_000 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 20_000 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 50_000, 10_000));
-            console.log({'5 reward with 50_000 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 50_000 boars when limit should be 10_000 ': reward_for_kill })
         }
         {
             let reward_for_kill = Number(await this.boarAdventure.boost_reward_for_kill(50, 60_000, 10_000));
-            console.log({'5 reward with 60_000 boars when limit should be 10_000 ': reward_for_kill})
+            console.log({ '5 reward with 60_000 boars when limit should be 10_000 ': reward_for_kill })
         }
 
 
@@ -303,60 +303,60 @@ describe("BoarAdventure", function () {
 
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 10_000, 10_000));
-            console.log({'5 reward with 10_000 boars when limit should be 10_000': reward_for_reproduce})
+            console.log({ '5 reward with 10_000 boars when limit should be 10_000': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 5_000, 10_000));
-            console.log({'5 reward with 5_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 5_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 11_000, 10_000));
-            console.log({'5 reward with 11_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 11_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 12_000, 10_000));
-            console.log({'5 reward with 12_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 12_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 13_000, 10_000));
-            console.log({'5 reward with 13_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 13_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 14_000, 10_000));
-            console.log({'5 reward with 14_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 14_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
 
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 15_000, 10_000));
-            console.log({'5 reward with 15_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 15_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 20_000, 10_000));
-            console.log({'5 reward with 20_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 20_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 50_000, 10_000));
-            console.log({'5 reward with 50_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 50_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 60_000, 10_000));
-            console.log({'5 reward with 60_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 60_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 70_000, 10_000));
-            console.log({'5 reward with 70_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 70_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 80_000, 10_000));
-            console.log({'5 reward with 80_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 80_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 90_000, 10_000));
-            console.log({'5 reward with 90_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 90_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
         {
             let reward_for_reproduce = Number(await this.boarAdventure.boost_reward_for_reproduce(50, 100_000, 10_000));
-            console.log({'5 reward with 100_000 boars when limit should be 10_000 ': reward_for_reproduce})
+            console.log({ '5 reward with 100_000 boars when limit should be 10_000 ': reward_for_reproduce })
         }
 
         for (let i = 0; i < 50; i++) {
@@ -408,4 +408,13 @@ describe("BoarAdventure", function () {
         expect(Number(ethers.utils.formatUnits(await this.mushroom.balanceOf(3)))).equal(2000);
     });
 
+    it("Should pause the contract successfully...", async function () {
+        await this.boarAdventure.pause();
+        await expect(this.boarAdventure
+            .reproduce(1))
+            .to.be.revertedWith('paused');
+        await expect(this.boarAdventure
+            .kill(1))
+            .to.be.revertedWith('paused');
+    });
 });

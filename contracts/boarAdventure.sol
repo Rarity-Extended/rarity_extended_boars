@@ -151,12 +151,13 @@ contract BaseMechanisms {
 }
 
 contract boarAdventure is OnlyExtended, BaseMechanisms {
-    uint public boar_population = 20_000;
+    uint public boar_population = 10_000;
     uint public expected_boars = 10_000;
     uint public extinction = 0;
     uint public extinctionBy = 0;
     uint constant DAY = 1 days;
     uint constant MAX_BOARS_REWARD = 20_000;
+    bool paused = false;
     mapping(uint => uint) public actions_log;
 
     IRarity public rm;
@@ -204,7 +205,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
     }
 
     function _get_random(uint _summoner, uint limit, bool withZero) public view returns (uint) {
-        _summoner += gasleft();
+        _summoner += gasleft(); //Added gasleft() so this fn return a diff random number even if it's called twice on the same external call
 
         uint result = 0;
         //If withZero is TRUE, result include zero
@@ -230,6 +231,10 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         uint former_expected_boars = expected_boars;
         expected_boars = new_expected_boars;
         emit ChangedExpectedBoars(former_expected_boars, new_expected_boars);
+    }
+
+    function pause() external onlyExtended {
+        paused = true;
     }
 
     function boost_reward_for_kill(uint reward, uint pop, uint expected) public pure returns (uint) {
@@ -329,6 +334,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
     
     function kill(uint _summoner) external {
         //Kill one boar, rewards are random
+        require(paused == false, "paused");
         require(boar_population > 0, "!boars");
         require(_isApprovedOrOwner(_summoner), "!summoner");
         require(block.timestamp > actions_log[_summoner], "!action");
@@ -361,6 +367,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
             wood.mint(receiver, qty);
         }
     }
+
     function mint_reward_reproduce(uint receiver, uint qty) internal returns (uint reward_qty_one, RewardReproduce rewardTypeOne, uint reward_qty_two, RewardReproduce rewardTypeTwo, uint reward_qty_three, RewardReproduce rewardTypeThree) {
         //Mint random rewards based on "qty" parm
         if (qty == 0)
@@ -399,11 +406,11 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
     }
 
     function reproduce(uint _summoner) external {
-        //Reproduce a boars, born a litter (1-6 boars), rewards are eligible
+        //Reproduce a boars, born a litter (1-3 boars), rewards are eligible
+        require(paused == false, "paused");
         require(_isApprovedOrOwner(_summoner), "!summoner");
         require(block.timestamp > actions_log[_summoner], "!action");
         actions_log[_summoner] = block.timestamp + DAY;
-
 
         uint reward = base_points_by_class(rm.class(_summoner));
         reward = bonus_by_handle_animal(reward, _summoner);
