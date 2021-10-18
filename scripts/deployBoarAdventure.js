@@ -1,4 +1,4 @@
-let { rarityAddr, attributesAddr, skillsAddr, randomCodexAddr } = require("../registry.json");
+let { rarityAddr, attributesAddr, skillsAddr, randomCodexAddr, extendedMultisig } = require("../registry.json");
 
 async function main() {
     //Compile
@@ -78,31 +78,40 @@ async function main() {
             this.tusks.address
         ],
     });
-
     await hre.run("verify:verify", {
         address: this.mushroom.address,
-        constructorArguments: [rarityAddr]
+        constructorArguments: [rarityAddr],
+        contract: "contracts/loot.sol:Mushroom"
     });
     await hre.run("verify:verify", {
         address: this.berries.address,
-        constructorArguments: [rarityAddr]
+        constructorArguments: [rarityAddr],
+        contract: "contracts/loot.sol:Berries"
     });
     await hre.run("verify:verify", {
         address: this.wood.address,
-        constructorArguments: [rarityAddr]
+        constructorArguments: [rarityAddr],
+        contract: "contracts/loot.sol:Wood"
     });
     await hre.run("verify:verify", {
         address: this.leather.address,
-        constructorArguments: [rarityAddr]
+        constructorArguments: [rarityAddr],
+        contract: "contracts/loot.sol:Leather"
     });
     await hre.run("verify:verify", {
         address: this.meat.address,
-        constructorArguments: [rarityAddr]
+        constructorArguments: [rarityAddr],
+        contract: "contracts/loot.sol:Meat"
     });
     await hre.run("verify:verify", {
         address: this.tusks.address,
-        constructorArguments: [rarityAddr]
+        constructorArguments: [rarityAddr],
+        contract: "contracts/loot.sol:Tusks"
     });
+
+    //Setting extended
+    await (await this.boarAdventure.setExtended(extendedMultisig)).wait();
+    console.log("Extended setted up successfully to:", extendedMultisig);
 }
 
 main()
