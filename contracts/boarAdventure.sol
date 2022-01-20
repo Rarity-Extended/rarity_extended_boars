@@ -151,13 +151,13 @@ contract BaseMechanisms {
 }
 
 contract boarAdventure is OnlyExtended, BaseMechanisms {
-    uint public boar_population = 10_000;
-    uint public expected_boars = 10_000;
+    uint public boar_population = 5_000;
+    uint public expected_boars = 5_000;
     uint public extinction = 0;
     uint public extinctionBy = 0;
     uint constant DAY = 1 days;
-    uint constant MAX_BOARS_REWARD = 20_000;
-    bool paused = false;
+    uint public max_boars_reward = 10_000;
+    bool public paused = false;
     mapping(uint => uint) public actions_log;
 
     IRarity public rm;
@@ -172,6 +172,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
     event Reproduced(uint _summoner, uint reward_qty_one, RewardReproduce RewardTypeOne, uint reward_qty_two, RewardReproduce RewardTypeTwo, uint reward_qty_three, RewardReproduce RewardTypeThree, uint litter);
     event Killed(uint _summoner, uint reward_qty_one, RewardKill RewardTypeOne, uint reward_qty_two, RewardKill RewardTypeTwo, uint reward_qty_three, RewardKill RewardTypeThree);
     event ChangedExpectedBoars(uint former_expected_boars, uint new_expected_boars);
+    event ChangedMaxBoarsReward(uint former_max_boars_reward, uint new_max_boars_reward);
 
     enum RewardReproduce {
         None,
@@ -233,8 +234,18 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         emit ChangedExpectedBoars(former_expected_boars, new_expected_boars);
     }
 
+    function change_max_boars_reward(uint new_max_boars_reward) external onlyExtended {
+        uint former_max_boars_reward = max_boars_reward;
+        max_boars_reward = new_max_boars_reward;
+        emit ChangedMaxBoarsReward(former_max_boars_reward, new_max_boars_reward);
+    }
+
     function pause() external onlyExtended {
         paused = true;
+    }
+
+    function unpause() external onlyExtended {
+        paused = false;
     }
 
     function boost_reward_for_kill(uint reward, uint pop, uint expected) public pure returns (uint) {
@@ -250,13 +261,13 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         return reward;
     }
 
-    function boost_reward_for_reproduce(uint reward, uint pop, uint expected) public pure returns (uint) {
+    function boost_reward_for_reproduce(uint reward, uint pop, uint expected) public view returns (uint) {
         if (reward == 0) {
             return 0;
         }
         if (pop > expected) {
-            if (pop < MAX_BOARS_REWARD) {
-                reward -= reward * pop / MAX_BOARS_REWARD;
+            if (pop < max_boars_reward) {
+                reward -= reward * pop / max_boars_reward;
             } else {
                 reward = 0;
             }
@@ -406,7 +417,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
     }
 
     function reproduce(uint _summoner) external {
-        //Reproduce a boars, born a litter (1-3 boars), rewards are eligible
+        //Reproduce a boars, born one boar, rewards are eligible
         require(paused == false, "paused");
         require(_isApprovedOrOwner(_summoner), "!summoner");
         require(block.timestamp > actions_log[_summoner], "!action");
@@ -417,8 +428,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
         reward = bonus_by_attr(reward, _summoner);
         (uint reward_qty_one, RewardReproduce rewardTypeOne, uint reward_qty_two, RewardReproduce rewardTypeTwo, uint reward_qty_three, RewardReproduce rewardTypeThree) = mint_reward_reproduce(_summoner, reward);
 
-        uint litter = _get_random(_summoner, 3, false);
-        boar_population += litter;
+        boar_population += 1;
 
         emit Reproduced(
             _summoner,
@@ -428,7 +438,7 @@ contract boarAdventure is OnlyExtended, BaseMechanisms {
             rewardTypeTwo,
             reward_qty_three,
             rewardTypeThree,
-            litter
+            1
         );
 
     }
