@@ -2,3 +2,4 @@ node_modules
 artifacts
 cache
 secrets.json
+.vscode
