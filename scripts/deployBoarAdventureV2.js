@@ -17,6 +17,8 @@ async function main() {
     await hre.run("clean");
     await hre.run("compile");
 
+    [this.deployer] = await ethers.getSigners();
+
     //Deploy
     this.BoarAdventure = await ethers.getContractFactory("boarAdventure");
     this.boarAdventure = await this.BoarAdventure.deploy(
@@ -36,15 +38,15 @@ async function main() {
 
     this.LOOT = new ethers.Contract(mushroomAddress, [
         'function setMinter(address _minter) external',
-    ]);
+    ], this.deployer);
 
     //Setting minter
-    await (await this.LOOT.attach(mushroomAddress).setMinter(this.boarAdventure.address)).wait();
-    await (await this.LOOT.attach(berriesAddress).setMinter(this.boarAdventure.address)).wait();
-    await (await this.LOOT.attach(woodAddress).setMinter(this.boarAdventure.address)).wait();
-    await (await this.LOOT.attach(leatherAddress).setMinter(this.boarAdventure.address)).wait();
-    await (await this.LOOT.attach(meatAddress).setMinter(this.boarAdventure.address)).wait();
-    await (await this.LOOT.attach(tusksAddress).setMinter(this.boarAdventure.address)).wait();
+    await this.LOOT.attach(mushroomAddress).setMinter(this.boarAdventure.address);
+    await this.LOOT.attach(berriesAddress).setMinter(this.boarAdventure.address);
+    await this.LOOT.attach(woodAddress).setMinter(this.boarAdventure.address);
+    await this.LOOT.attach(leatherAddress).setMinter(this.boarAdventure.address);
+    await this.LOOT.attach(meatAddress).setMinter(this.boarAdventure.address);
+    await this.LOOT.attach(tusksAddress).setMinter(this.boarAdventure.address);
     console.log("Minter setted up successfully to:", this.boarAdventure.address);
 
     //Verify
